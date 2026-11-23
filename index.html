@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Connected Life Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5FA; --surface:#FFFFFF; --ink:#231D3A; --muted:#5E5878; --line:#D5D8E6;
+  --accent:#B23A6B; --accent-ink:#FFFFFF; --gold:#B87A0A; --sage:#3F6E59; --soft:#E9ECF6;
+  --display:"Bricolage Grotesque","Trebuchet MS",Verdana,sans-serif;
+  --body:"Instrument Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#17132A; --surface:#221D3B; --ink:#EFEAF8; --muted:#ABA4C4; --line:#3A3358;
+    --accent:#F08FB2; --accent-ink:#2A1020; --gold:#F0C05A; --sage:#8FC0A8; --soft:#2A2447;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#17132A; --surface:#221D3B; --ink:#EFEAF8; --muted:#ABA4C4; --line:#3A3358;
+  --accent:#F08FB2; --accent-ink:#2A1020; --gold:#F0C05A; --sage:#8FC0A8; --soft:#2A2447;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:680px;margin:0 auto;padding:0 20px 56px}
+
+/* sky band: the one loud element. It moves from morning to night as you walk. */
+.sky{position:relative;height:132px;overflow:hidden;
+  background:linear-gradient(180deg,#BFD9F2 0%,#DDE9F0 12%,#F6E3A1 28%,#F2B36B 46%,#E07A7A 62%,#8A4F8F 80%,#2B2440 100%);
+  background-size:100% 900%;background-position:0 0;transition:background-position .9s ease}
+.sun{position:absolute;width:44px;height:44px;border-radius:50%;background:#FFE9A8;
+  box-shadow:0 0 0 10px rgba(255,233,168,.28);left:10%;top:14%;transition:left .9s ease,top .9s ease,background .9s ease}
+.ridge{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:64px;display:block}
+.ridge path{fill:var(--bg)}
+@media (prefers-reduced-motion: reduce){.sky,.sun{transition:none}}
+
+h1{font-family:var(--display);font-weight:700;font-size:clamp(2rem,7vw,2.9rem);line-height:1.05;letter-spacing:-.02em;margin:8px 0 10px}
+.lede{color:var(--muted);margin:0 0 22px;max-width:56ch}
+.lede a{color:inherit}
+
+.trail{display:flex;gap:0;overflow-x:auto;padding:6px 2px 14px;margin:0 -2px 18px;list-style:none;scrollbar-width:thin}
+.trail li{display:flex;align-items:center;flex:0 0 auto}
+.trail li+li::before{content:"";width:18px;height:2px;background:var(--line)}
+.trail li.done+li::before{background:var(--accent)}
+.trail button{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:var(--muted);
+  font:600 15px var(--body);cursor:pointer;padding:0}
+.trail li.done button{border-color:var(--accent);color:var(--accent)}
+.trail button[aria-current="step"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.trail li.map button{width:auto;padding:0 14px;border-radius:19px}
+
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.55rem,5.2vw,2rem);line-height:1.12;letter-spacing:-.015em;margin:0 0 8px}
+h2:focus{outline:none}
+.count{color:var(--muted);font-size:.9rem;margin:0 0 4px}
+.idea{margin:0 0 22px;max-width:58ch}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:0 0 14px}
+.block h3{font-family:var(--body);font-weight:600;font-size:1.02rem;margin:0 0 4px}
+.hint{color:var(--muted);font-size:.92rem;margin:0 0 12px}
+label{display:block;font-weight:500;font-size:.95rem;margin:12px 0 5px}
+label:first-of-type{margin-top:0}
+input[type=text],input[type=number],textarea,select{width:100%;max-width:100%;font:inherit;color:var(--ink);background:var(--bg);
+  border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+textarea{min-height:74px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--accent)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 .95rem var(--body);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:disabled{opacity:.45;cursor:not-allowed}
+.addrow{display:flex;gap:8px;margin-top:12px}
+.addrow input{flex:1;min-width:0}
+
+.btn{font:600 1rem var(--body);padding:11px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:8px 12px;font-size:.92rem}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:22px}
+
+.rate{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;margin-top:12px}
+.rate span.v{font-weight:600;min-width:2.4ch;text-align:right;font-variant-numeric:tabular-nums}
+.rate input{grid-column:1/-1}
+.scale{display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem;margin-top:-2px}
+
+.card{background:var(--soft);border-radius:12px;padding:16px;font-family:var(--display);font-weight:500;font-size:1.2rem;line-height:1.3;margin:0 0 12px;min-height:3.4em}
+.nudge{border-left:3px solid var(--sage);padding:2px 0 2px 12px;margin:14px 0 0;color:var(--ink)}
+.row{border-top:1px solid var(--line);padding:12px 0}
+.row:first-of-type{border-top:0;padding-top:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dayrow{display:grid;grid-template-columns:1fr 84px;gap:10px;align-items:end}
+.total{font-weight:600;margin:12px 0 0}
+@media (max-width:460px){.two{grid-template-columns:1fr}}
+
+.map dl{margin:0}
+.map dt{font-weight:600;margin-top:16px}
+.map dt:first-child{margin-top:0}
+.map dd{margin:3px 0 0;color:var(--ink);overflow-wrap:anywhere}
+.map dd.empty{color:var(--muted)}
+.gap{color:var(--accent);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.status{color:var(--sage);font-weight:500;min-height:1.5em;margin:10px 0 0}
+#plain{margin-top:12px;min-height:180px;font-size:.9rem}
+footer{color:var(--muted);font-size:.88rem;margin-top:34px;border-top:1px solid var(--line);padding-top:16px}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true">
+  <div class="sun" id="sun"></div>
+  <svg class="ridge" viewBox="0 0 800 64" preserveAspectRatio="none"><path d="M0 64V40l70-22 60 18 90-32 80 30 70-14 90 26 80-34 100 30 80-12 80 20v14z"/></svg>
+</div>
+<div class="wrap">
+  <header>
+    <h1>The Connected Life Audit</h1>
+    <p class="lede">Eight short stops, about 15 minutes. You leave with one page: what matters to you, who matters to you, and what you’ll do about it this week. Built on the ideas in <a href="https://lisakalfus.com/blog/what-50-years-taught-me" target="_blank" rel="noopener">Lisa Kalfus’s essay on what 50 years taught her</a>.</p>
+  </header>
+  <nav aria-label="Stops"><ol class="trail" id="trail"></ol></nav>
+  <main id="main"></main>
+  <footer>
+    Your answers stay in this browser and nobody else can see them. The ideas come from Lisa Kalfus’s essay <a href="https://lisakalfus.com/blog/what-50-years-taught-me" target="_blank" rel="noopener">“What 50 Years Taught Me About Living Fully Connected”</a>. The exercises and wording here are an independent adaptation, so read her original for the stories behind them.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var KEY="connected-life-audit-v1";
+var STOPS=[
+ {t:"Name what matters",idea:"Values work like a compass. Once you can name yours, decisions stop being about what you should do and start being about what fits."},
+ {t:"Make room for joy",idea:"A lot of what fills a week is habit, not joy. The way to find out is to pull back on one thing for a set stretch and see what you’d rather put there."},
+ {t:"Find the thread",idea:"Purpose usually isn’t new. It’s something you’ve been doing in some form for years. Fill in four circles and look for what repeats."},
+ {t:"Open the door",idea:"Close relationships come from good conversations, and those rest on four things: curiosity, presence, openness and generosity. Rate yourself honestly."},
+ {t:"Ask while you can",idea:"The people you love won’t always be around to answer. Pick one person and one question you’ve never asked them."},
+ {t:"Choose your circle",idea:"Closeness comes from the quality of what you share, not the hours logged. Name the few people you’d want beside you for life and check how you’re investing in them."},
+ {t:"Shape your day",idea:"Good days tend to share the same few ingredients, and most of them take minutes. Pick a small action for each one."},
+ {t:"Protect your energy",idea:"Your energy is what you bring to every relationship. Choose one change that would give you more of it."}
+];
+var VALUES=["Connection","Curiosity","Love","Adventure","Play","Freedom","Family","Health","Growth","Creativity","Honesty","Service","Faith","Courage","Calm","Craft","Generosity","Learning","Humor","Independence","Loyalty","Nature","Security","Impact"];
+var OPENERS=["What’s had your attention lately?","What are you looking forward to this month?","What’s something you’ve changed your mind about recently?","What’s been the best part of your week so far?","What are you working on that you’d love to be asked about?","What’s giving you energy these days?"];
+var DECK={
+ "A parent":["What did you want your life to look like when you were my age?","What was the hardest part of raising me that I never saw?","Which of your own parents’ habits did you keep, and which did you work to drop?","What moment did the most to make you who you are?"],
+ "A partner":["When did you last feel fully understood by me?","What’s a dream you’ve stopped mentioning?","What do you wish I asked you about more often?"],
+ "A sibling":["What do you remember about growing up that I might have seen differently?","What were you carrying back then that I didn’t notice?","What do you hope we’re like with each other in 20 years?"],
+ "A friend":["What’s taking up most of your mind right now?","What part of your life do people rarely ask you about?","What would you try this year if you knew I’d back you?"],
+ "A child":["What do you wish I understood about your life right now?","When do you feel closest to me?","What’s one thing I did as a parent that you’d do differently?"]
+};
+var PRACTICE={
+ curiosity:"In your next conversation, ask one follow-up question before you say anything about yourself.",
+ presence:"For one conversation today, leave your phone in another room.",
+ openness:"Tell one person something true that you’d normally smooth over.",
+ generosity:"Make one introduction or send one specific note of praise today."
+};
+var INGR=[["curiosity","Curiosity","I ask instead of assuming."],["presence","Presence","People get my full attention."],["openness","Openness","I show up as I am, even when it’s a risk."],["generosity","Generosity","I act on what others need without being asked."]];
+var IKI=[["love","What you love doing"],["good","What you’re good at"],["needs","What people around you need"],["paid","What you can be paid for"]];
+
+function fresh(){return {step:0,values:[],fit:{},joyDrop:"",joyAdd:"",joyDays:"30",
+ iki:{love:"",good:"",needs:"",paid:"",thread:""},
+ conn:{curiosity:3,presence:3,openness:3,generosity:3},opener:OPENERS[0],surWho:"",surWhat:"",
+ askWho:"",askRel:"A parent",askQ:"",askWhen:"",
+ people:[0,1,2,3,4].map(function(){return {name:"",last:"",move:""};}),
+ day:[["Yourself","",5],["Someone you love","",5],["Your purpose","",10],["Play","",5],["Nature","",10]].map(function(d){return {label:d[0],action:d[1],min:d[2]};}),
+ vital:"",vitalStart:""};}
+var S=fresh();
+try{var raw=localStorage.getItem(KEY);if(raw){var o=JSON.parse(raw);if(o&&typeof o==="object"){for(var k in S){if(o[k]!==undefined&&o[k]!==null)S[k]=o[k];}}}}catch(e){}
+if(!Array.isArray(S.people)||S.people.length!==5||!Array.isArray(S.day)||S.day.length!==5||!Array.isArray(S.values)){S=fresh();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function setPath(p,v){var a=p.split("."),o=S;for(var i=0;i<a.length-1;i++)o=o[a[i]];o[a[a.length-1]]=v;}
+function getPath(p){var a=p.split("."),o=S;for(var i=0;i<a.length;i++)o=o[a[i]];return o;}
+function txt(p,label,ph){return '<label for="f-'+p+'">'+label+'</label><input type="text" id="f-'+p+'" data-k="'+p+'" value="'+esc(getPath(p))+'" placeholder="'+esc(ph||"")+'">';}
+function area(p,label,ph){return '<label for="f-'+p+'">'+label+'</label><textarea id="f-'+p+'" data-k="'+p+'" placeholder="'+esc(ph||"")+'">'+esc(getPath(p))+'</textarea>';}
+function slider(p,label,sub){var v=getPath(p)||3;return '<div class="rate"><label for="f-'+p+'" style="margin:0">'+label+(sub?' <span style="font-weight:400;color:var(--muted)">'+sub+'</span>':'')+'</label><span class="v" id="o-'+p+'">'+v+'/5</span><input type="range" min="1" max="5" step="1" id="f-'+p+'" data-k="'+p+'" data-num="1" value="'+v+'"></div>';}
+
+function stepDone(i){
+ switch(i){
+  case 0:return S.values.length>0;
+  case 1:return !!(S.joyDrop||S.joyAdd);
+  case 2:return !!(S.iki.love||S.iki.good||S.iki.needs||S.iki.paid||S.iki.thread);
+  case 3:return !!(S.surWho||S.surWhat);
+  case 4:return !!(S.askWho||S.askQ);
+  case 5:return S.people.some(function(p){return p.name;});
+  case 6:return S.day.some(function(d){return d.action;});
+  case 7:return !!S.vital;
+ }return false;
+}
+function lowest(){var lo=null;INGR.forEach(function(g){if(lo===null||S.conn[g[0]]<S.conn[lo])lo=g[0];});return lo;}
+function dayTotal(){return S.day.reduce(function(n,d){return n+(d.action?(parseInt(d.min,10)||0):0);},0);}
+
+var V=[];
+V[0]=function(){
+ var h='<div class="block"><h3>Pick up to five</h3><p class="hint">Choose the words you want steering your life, not the ones that sound good.</p><div class="chips">';
+ var all=VALUES.concat(S.values.filter(function(v){return VALUES.indexOf(v)<0;}));
+ all.forEach(function(v){var on=S.values.indexOf(v)>=0;h+='<button type="button" class="chip" data-val="'+esc(v)+'" aria-pressed="'+on+'"'+(!on&&S.values.length>=5?' disabled':'')+'>'+esc(v)+'</button>';});
+ h+='</div><div class="addrow"><input type="text" id="newval" aria-label="Add your own value" placeholder="Add your own" maxlength="30"><button type="button" class="btn small" id="addval">Add value</button></div></div>';
+ if(S.values.length){
+  h+='<div class="block"><h3>Now check them against last week</h3><p class="hint">How much did your last seven days look like each one?</p>';
+  S.values.forEach(function(v,i){if(!S.fit[v])S.fit[v]=3;h+=slider("fit."+v,esc(v));});
+  h+='<div class="scale"><span>Barely</span><span>Fully</span></div></div>';
+ }
+ return h;
+};
+V[1]=function(){
+ var h='<div class="block"><h3>Set up one small experiment</h3><p class="hint">You’re not quitting anything for good. You’re testing what the time is worth.</p>'+
+ txt("joyDrop","One habit that fills your time but doesn’t fill you","Scrolling after dinner")+
+ txt("joyAdd","What you’ll try in that space","A walk, a call, something you make with your hands")+
+ '<label id="dl">How long you’ll run it</label><div class="chips" role="group" aria-labelledby="dl">';
+ ["7","14","30"].forEach(function(d){h+='<button type="button" class="chip" data-days="'+d+'" aria-pressed="'+(S.joyDays===d)+'">'+d+' days</button>';});
+ return h+'</div></div>';
+};
+V[2]=function(){
+ var h='<div class="block"><h3>Four circles</h3><p class="hint">A few words in each is plenty. This is the Japanese idea of ikigai, a reason for being.</p>';
+ IKI.forEach(function(c){h+=txt("iki."+c[0],c[1]);});
+ h+='</div><div class="block"><h3>The thread</h3><p class="hint">Read your four answers back. What shows up in more than one?</p>'+
+ area("iki.thread","What you’ve always done, in some form, that makes you and other people come alive","")+'</div>';
+ return h;
+};
+V[3]=function(){
+ var h='<div class="block"><h3>Rate the four ingredients</h3><p class="hint">Score how you’ve actually behaved this month, not how you’d like to.</p>';
+ INGR.forEach(function(g){h+=slider("conn."+g[0],g[1],g[2]);});
+ h+='<div class="scale"><span>Rarely</span><span>Almost always</span></div><p class="nudge" id="nudge"></p></div>';
+ h+='<div class="block"><h3>A question to carry into your next conversation</h3><p class="hint">Small talk opens the door. One better question walks through it.</p><div class="card" id="opener" aria-live="polite">'+esc(S.opener)+'</div><button type="button" class="btn small" id="draw">Draw another question</button></div>';
+ h+='<div class="block"><h3>One act of generosity this week</h3>'+txt("surWho","Who could you surprise?","A name")+txt("surWhat","What do they need or want most right now?","A dinner, a break, an intro, an hour of listening")+'</div>';
+ return h;
+};
+V[4]=function(){
+ var h='<div class="block"><h3>Who, and what will you ask?</h3>'+txt("askWho","The person","A name")+
+ '<label for="f-askRel">They are</label><select id="f-askRel" data-k="askRel" data-rerender="1">';
+ Object.keys(DECK).forEach(function(r){h+='<option'+(S.askRel===r?' selected':'')+'>'+r+'</option>';});
+ h+='</select><label id="ql">Tap a question to use it, or write your own below</label><div class="chips" role="group" aria-labelledby="ql" style="flex-direction:column;align-items:stretch">';
+ (DECK[S.askRel]||[]).forEach(function(q){h+='<button type="button" class="chip" style="text-align:left;border-radius:12px" data-q="'+esc(q)+'" aria-pressed="'+(S.askQ===q)+'">'+esc(q)+'</button>';});
+ h+='</div>'+area("askQ","Your question","The one thing you’re curious about and have never asked")+txt("askWhen","When you’ll ask it","Sunday’s call")+'</div>';
+ return h;
+};
+V[5]=function(){
+ var h='<div class="block"><h3>Your five</h3><p class="hint">In Okinawa a small circle of friends who commit to each other for life is called a moai. Who’s in yours?</p>';
+ S.people.forEach(function(p,i){
+  h+='<div class="row">'+txt("people."+i+".name","Person "+(i+1),"A name")+'<div class="two"><div><label for="f-people.'+i+'.last">Last real conversation</label><select id="f-people.'+i+'.last" data-k="people.'+i+'.last"><option value="">Choose</option>';
+  ["This week","This month","Longer ago"].forEach(function(o){h+='<option'+(p.last===o?' selected':'')+'>'+o+'</option>';});
+  h+='</select></div><div>'+txt("people."+i+".move","Your next move","Voice memo tonight")+'</div></div></div>';
+ });
+ return h+'</div>';
+};
+V[6]=function(){
+ var h='<div class="block"><h3>Five ways to connect, every day</h3><p class="hint">Rename any of them to fit your life. Aim for minutes, not hours.</p>';
+ S.day.forEach(function(d,i){
+  h+='<div class="row">'+txt("day."+i+".label","Connect with","")+'<div class="dayrow"><div>'+txt("day."+i+".action","Your small action","")+'</div><div><label for="f-day.'+i+'.min">Minutes</label><input type="number" min="1" max="240" id="f-day.'+i+'.min" data-k="day.'+i+'.min" data-num="1" value="'+esc(d.min)+'"></div></div></div>';
+ });
+ h+='<p class="total" id="total" aria-live="polite"></p></div>';
+ h+='<div class="block"><h3>End the day with three questions</h3><p class="hint">Take them on an evening walk: what gave you energy today, what took it, and what will you change tomorrow?</p></div>';
+ return h;
+};
+V[7]=function(){
+ return '<div class="block"><h3>One choice</h3><p class="hint">Sleep, movement, food, alcohol, screens. Choose the one you already know the answer to.</p>'+
+ area("vital","The one change that would give you more energy for the life you want","")+txt("vitalStart","The day you’ll start","Tomorrow")+'</div>';
+};
+
+function line(dt,dd){return '<dt>'+dt+'</dt><dd'+(dd?'':' class="empty"')+'>'+(dd||'Not filled in yet')+'</dd>';}
+function mapView(){
+ var any=false;for(var i=0;i<8;i++)if(stepDone(i))any=true;
+ var h='<p class="count">Your map</p><h2 tabindex="-1" id="head">What you decided</h2>';
+ if(!any){return h+'<p class="idea">Nothing here yet. Start at stop 1 and your answers will collect on this page.</p><div class="nav"><button type="button" class="btn primary" data-go="0">Start at stop 1</button></div>';}
+ h+='<p class="idea">This is your page. Pick the single line you’ll act on in the next 24 hours.</p><div class="block map"><dl>';
+ var vals=S.values.map(function(v){var f=S.fit[v]||3;return esc(v)+' '+f+'/5'+(f<=2?' <span class="gap">(gap)</span>':'');}).join(', ');
+ h+=line("Your values, and how last week matched",vals);
+ h+=line("Your joy experiment",(S.joyDrop||S.joyAdd)?('For '+esc(S.joyDays)+' days: less '+esc(S.joyDrop||'…')+', more '+esc(S.joyAdd||'…')):'');
+ h+=line("Your thread",esc(S.iki.thread));
+ var lo=lowest();
+ h+=line("Connection skill to practice",INGR.filter(function(g){return g[0]===lo;})[0][1]+' ('+S.conn[lo]+'/5). '+PRACTICE[lo]);
+ h+=line("Question to carry",esc(S.opener));
+ h+=line("Act of generosity",(S.surWho||S.surWhat)?(esc(S.surWho||'Someone')+': '+esc(S.surWhat||'…')):'');
+ h+=line("The question you’ll ask",(S.askWho||S.askQ)?(esc(S.askWho||'Someone')+(S.askWhen?', '+esc(S.askWhen):'')+': '+esc(S.askQ||'…')):'');
+ var ppl=S.people.filter(function(p){return p.name;}).map(function(p){return esc(p.name)+(p.last?' ('+esc(p.last.toLowerCase())+')':'')+(p.move?': '+esc(p.move):'')+(p.last==="Longer ago"?' <span class="gap">(overdue)</span>':'');}).join('<br>');
+ h+=line("Your circle",ppl);
+ var day=S.day.filter(function(d){return d.action;}).map(function(d){return esc(d.label)+': '+esc(d.action)+' ('+(parseInt(d.min,10)||0)+' min)';}).join('<br>');
+ h+=line("Your day"+(day?', '+dayTotal()+' minutes in total':''),day);
+ h+=line("Your energy choice",S.vital?(esc(S.vital)+(S.vitalStart?', starting '+esc(S.vitalStart):'')):'');
+ h+='</dl></div><div class="actions"><button type="button" class="btn primary" id="copy">Copy my map</button><button type="button" class="btn" id="reset">Clear my answers</button></div><p class="status" id="status" role="status"></p><textarea id="plain" readonly hidden aria-label="Your map as plain text"></textarea>';
+ h+='<div class="nav"><button type="button" class="btn" data-go="7">Back</button><span></span></div>';
+ return h;
+}
+function plainText(){
+ var L=["MY CONNECTED LIFE MAP",""];
+ if(S.values.length)L.push("Values: "+S.values.map(function(v){return v+" "+(S.fit[v]||3)+"/5";}).join(", "));
+ if(S.joyDrop||S.joyAdd)L.push("Joy experiment ("+S.joyDays+" days): less "+(S.joyDrop||"…")+", more "+(S.joyAdd||"…"));
+ if(S.iki.thread)L.push("My thread: "+S.iki.thread);
+ var lo=lowest();L.push("Practice: "+lo+" ("+S.conn[lo]+"/5). "+PRACTICE[lo]);
+ L.push("Question to carry: "+S.opener);
+ if(S.surWho||S.surWhat)L.push("Generosity: "+(S.surWho||"Someone")+": "+(S.surWhat||"…"));
+ if(S.askWho||S.askQ)L.push("Ask "+(S.askWho||"someone")+(S.askWhen?" ("+S.askWhen+")":"")+": "+(S.askQ||"…"));
+ var p=S.people.filter(function(x){return x.name;});if(p.length){L.push("My circle:");p.forEach(function(x){L.push("  - "+x.name+(x.last?" ("+x.last.toLowerCase()+")":"")+(x.move?": "+x.move:""));});}
+ var d=S.day.filter(function(x){return x.action;});if(d.length){L.push("My day ("+dayTotal()+" min):");d.forEach(function(x){L.push("  - "+x.label+": "+x.action+" ("+(parseInt(x.min,10)||0)+" min)");});}
+ if(S.vital)L.push("Energy choice: "+S.vital+(S.vitalStart?", starting "+S.vitalStart:""));
+ L.push("","Tonight: what gave me energy, what took it, what will I change tomorrow?");
+ return L.join("\n");
+}
+
+var main=document.getElementById("main"),trail=document.getElementById("trail"),sun=document.getElementById("sun"),sky=document.querySelector(".sky");
+function paintSky(){var p=S.step/8;sky.style.backgroundPosition="0 "+(p*100)+"%";sun.style.left=(10+p*72)+"%";sun.style.top=(14+p*62)+"%";sun.style.background=p>.55?"#FFC98A":"#FFE9A8";}
+function renderTrail(){
+ var h="";for(var i=0;i<8;i++){h+='<li class="'+(stepDone(i)?'done':'')+'"><button type="button" data-go="'+i+'" aria-label="Stop '+(i+1)+': '+STOPS[i].t+'"'+(S.step===i?' aria-current="step"':'')+'>'+(i+1)+'</button></li>';}
+ h+='<li class="map"><button type="button" data-go="8"'+(S.step===8?' aria-current="step"':'')+'>Your map</button></li>';trail.innerHTML=h;
+}
+function refreshLive(){
+ var n=document.getElementById("nudge");if(n){var lo=lowest();n.textContent="Your lowest is "+lo+". Try this: "+PRACTICE[lo];}
+ var t=document.getElementById("total");if(t){var m=dayTotal();t.textContent=m?("That’s "+m+" minutes a day."):"Add an action to see what the day costs you in minutes.";}
+}
+function render(focus){
+ var i=S.step,h;
+ if(i===8){h=mapView();}
+ else{
+  h='<p class="count">Stop '+(i+1)+' of 8</p><h2 tabindex="-1" id="head">'+STOPS[i].t+'</h2><p class="idea">'+STOPS[i].idea+'</p>'+V[i]();
+  h+='<div class="nav">'+(i>0?'<button type="button" class="btn" data-go="'+(i-1)+'">Back</button>':'<span></span>')+'<button type="button" class="btn primary" data-go="'+(i+1)+'">'+(i<7?'Next: '+STOPS[i+1].t.toLowerCase():'See your map')+'</button></div>';
+ }
+ main.innerHTML=h;renderTrail();paintSky();refreshLive();save();
+ if(focus){var hd=document.getElementById("head");if(hd){hd.focus({preventScroll:true});}trail.scrollIntoView({block:"start"});var cur=trail.querySelector('[aria-current]');if(cur&&cur.scrollIntoView)cur.scrollIntoView({inline:"center",block:"nearest"});}
+}
+function go(n){S.step=Math.max(0,Math.min(8,n));render(true);}
+
+document.addEventListener("click",function(e){
+ var b=e.target.closest("button");if(!b)return;
+ if(b.dataset.go!==undefined){go(parseInt(b.dataset.go,10));return;}
+ if(b.dataset.val){var v=b.dataset.val,ix=S.values.indexOf(v);if(ix>=0){S.values.splice(ix,1);}else if(S.values.length<5){S.values.push(v);}render(false);return;}
+ if(b.id==="addval"){var inp=document.getElementById("newval"),nv=inp.value.replace(/\./g,"").trim();if(nv&&S.values.length<5&&S.values.map(function(x){return x.toLowerCase();}).indexOf(nv.toLowerCase())<0){S.values.push(nv);render(false);}return;}
+ if(b.dataset.days){S.joyDays=b.dataset.days;render(false);return;}
+ if(b.id==="draw"){var c=OPENERS.indexOf(S.opener);S.opener=OPENERS[(c+1)%OPENERS.length];document.getElementById("opener").textContent=S.opener;save();return;}
+ if(b.dataset.q){S.askQ=b.dataset.q;render(false);return;}
+ if(b.id==="copy"){
+  var t=plainText(),st=document.getElementById("status"),box=document.getElementById("plain");
+  var fallback=function(){box.hidden=false;box.value=t;box.focus();box.select();st.textContent="Copying is blocked here. Your map is in the box below, selected and ready to copy.";};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){st.textContent="Copied. Paste it into your notes or send it to someone.";},fallback);}else{fallback();}
+  return;
+ }
+ if(b.id==="reset"){
+  if(b.dataset.armed){S=fresh();try{localStorage.removeItem(KEY);}catch(err){}render(true);}
+  else{b.dataset.armed="1";b.textContent="Tap again to clear everything";}
+ }
+});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="newval"){e.preventDefault();document.getElementById("addval").click();}});
+document.addEventListener("input",function(e){
+ var el=e.target,k=el.dataset?el.dataset.k:null;if(!k)return;
+ var v=el.dataset.num?(parseInt(el.value,10)||0):el.value;setPath(k,v);
+ if(el.type==="range"){var o=document.getElementById("o-"+k);if(o)o.textContent=v+"/5";}
+ save();refreshLive();
+ if(k==="askQ"){var qs=main.querySelectorAll("[data-q]");for(var i=0;i<qs.length;i++)qs[i].setAttribute("aria-pressed",String(qs[i].dataset.q===v));}
+});
+document.addEventListener("change",function(e){var el=e.target;if(el.dataset&&el.dataset.rerender){render(false);}else{renderTrail();}});
+render(false);
+})();
+</script>
+</body>
+</html>
